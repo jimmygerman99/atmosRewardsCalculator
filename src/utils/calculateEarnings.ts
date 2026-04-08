@@ -22,6 +22,7 @@ import {
   EARNING_2026_SPEND_RATE,
   EARNING_2026_SEGMENT_RATE,
 } from '../data/flights';
+import { haversineDistance } from './haversine';
 import {
   HOTEL_MILES_PER_DOLLAR,
   CRUISE_MILES_PER_DOLLAR,
@@ -59,44 +60,44 @@ export function calculateFlightEarnings(
   elite: EliteTier,
   method: EarningMethod2026 = 'classic'
 ): FlightLegEarnings {
-  if (leg.distanceMiles === 0 && leg.ticketPrice === 0) {
-    return { legId: leg.id, baseMiles: 0, miles: 0, statusPoints: 0 };
+  const empty: FlightLegEarnings = { legId: leg.id, baseMiles: 0, miles: 0, statusPoints: 0 };
+  const eliteBonus = ELITE_BONUS[elite] ?? 0;
+
+  // ── 2026 spend method — distance not needed ──
+  if (method === 'spend') {
+    if (!leg.ticketPrice) return empty;
+    const baseMiles = (leg.ticketPrice * EARNING_2026_SPEND_RATE) || 0;
+    const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
+    return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
   }
 
-  const eliteBonus = ELITE_BONUS[elite];
+  // ── 2026 segment method — distance not needed ──
+  if (method === 'segment') {
+    const baseMiles = EARNING_2026_SEGMENT_RATE;
+    const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
+    return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
+  }
+
+  // ── Classic & Distance methods — require valid origin + destination ──
+  if (!leg.origin || !leg.destination) return empty;
+  const distanceMiles = haversineDistance(leg.origin, leg.destination);
+  if (!distanceMiles) return empty;
 
   // ── 2026 distance method ──
   if (method === 'distance') {
-    // 1 pt/mile, no fare-class bonus, no minimum floor, elite bonus still applies to miles
-    const baseMiles = leg.distanceMiles * EARNING_2026_DISTANCE_RATE;
-    const miles = Math.round(baseMiles * (1 + eliteBonus));
-    return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) };
-  }
-
-  // ── 2026 spend method ──
-  if (method === 'spend') {
-    const baseMiles = leg.ticketPrice * EARNING_2026_SPEND_RATE;
-    const miles = Math.round(baseMiles * (1 + eliteBonus));
-    return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) };
-  }
-
-  // ── 2026 segment method ──
-  if (method === 'segment') {
-    const baseMiles = EARNING_2026_SEGMENT_RATE;
-    const miles = Math.round(baseMiles * (1 + eliteBonus));
-    return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) };
+    const baseMiles = (distanceMiles * EARNING_2026_DISTANCE_RATE) || 0;
+    const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
+    return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
   }
 
   // ── Classic (current) method ──
-  if (leg.distanceMiles === 0) return { legId: leg.id, baseMiles: 0, miles: 0, statusPoints: 0 };
-
   const multiplier = getFareMultiplier(leg);
-  const rawBase = leg.distanceMiles * multiplier;
+  const rawBase = (distanceMiles * multiplier) || 0;
   const baseMiles =
     leg.airline !== 'partner' ? Math.max(rawBase, MIN_FLIGHT_POINTS) : rawBase;
 
-  const miles = Math.round(baseMiles * (1 + eliteBonus));
-  const statusPoints = Math.round(baseMiles);
+  const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
+  const statusPoints = Math.round(baseMiles) || 0;
 
   return { legId: leg.id, baseMiles, miles, statusPoints };
 }

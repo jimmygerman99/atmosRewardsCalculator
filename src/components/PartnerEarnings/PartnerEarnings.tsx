@@ -40,6 +40,10 @@ function CategoryRow({ label, description, icon, children, miles, statusPoints }
   );
 }
 
+function blockInvalidKeys(e: React.KeyboardEvent<HTMLInputElement>) {
+  if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+}
+
 function DollarInput({ label, value, onChange, placeholder }: {
   label: string; value: number; onChange: (v: number) => void; placeholder?: string;
 }) {
@@ -52,6 +56,7 @@ function DollarInput({ label, value, onChange, placeholder }: {
           type="number" min="0" step="1"
           value={value || ''}
           placeholder={placeholder ?? '0'}
+          onKeyDown={blockInvalidKeys}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
@@ -71,6 +76,7 @@ function NumberInput({ label, value, onChange, placeholder, suffix }: {
           type="number" min="0" step="1"
           value={value || ''}
           placeholder={placeholder ?? '0'}
+          onKeyDown={blockInvalidKeys}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${suffix ? 'pr-16' : ''}`}
         />
@@ -88,12 +94,7 @@ export default function PartnerEarnings({ spend, earnings, onChange }: Props) {
   }
 
   return (
-    <section className="mb-8">
-      <h2 className="text-lg font-semibold text-gray-700 mb-1">Portal & Partner Purchases</h2>
-      <p className="text-xs text-gray-400 mb-3">
-        Earn Atmos Miles and Status Points through Atmos partner purchases.
-      </p>
-
+    <div>
       <div className="flex flex-col gap-3">
         {/* Shopping Portal */}
         <CategoryRow
@@ -213,6 +214,6 @@ export default function PartnerEarnings({ spend, earnings, onChange }: Props) {
           />
         </CategoryRow>
       </div>
-    </section>
+    </div>
   );
 }

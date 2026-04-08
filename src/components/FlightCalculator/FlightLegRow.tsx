@@ -1,5 +1,7 @@
 import type { FlightLeg, Airline, AlaskaFareClass, PartnerFareClass, FlightLegEarnings, EliteTier, EarningMethod2026 } from '../../types';
 import { ALASKA_FARE_LABELS, PARTNER_FARE_LABELS, ELITE_LABELS } from '../../data/flights';
+import { haversineDistance } from '../../utils/haversine';
+import AirportInput from './AirportInput';
 
 interface Props {
   leg: FlightLeg;
@@ -45,10 +47,15 @@ const GLOBAL_SENTINEL = '__global__';
 export default function FlightLegRow({ leg, earnings, index, globalElite, earningMethod, highlightChip, onChange, onRemove, canRemove }: Props) {
   const isPartner = leg.airline === 'partner';
   const showFareClass = earningMethod === 'classic';
-  const showDistance  = earningMethod === 'classic' || earningMethod === 'distance';
+  const showAirports = earningMethod === 'classic' || earningMethod === 'distance';
   const showTicketPrice = earningMethod === 'spend';
   const hasOverride = leg.eliteOverride !== undefined;
   const effectiveElite = leg.eliteOverride ?? globalElite;
+
+  // Computed distance for display badge
+  const computedDistance = showAirports && leg.origin && leg.destination
+    ? haversineDistance(leg.origin, leg.destination)
+    : 0;
 
   function handleAirlineChange(airline: Airline) {
     onChange({ ...leg, airline, fareClass: defaultFareClass(airline) });
@@ -67,11 +74,36 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
   const chipClass = hasOverride ? TIER_CHIP_OVERRIDE[effectiveElite] : TIER_CHIP[effectiveElite];
   const highlightClass = highlightChip && !hasOverride ? 'ring-2 ring-offset-1 ring-blue-400 scale-105 shadow-md' : '';
 
+  const hasEarnings = earnings.miles > 0 || earnings.statusPoints > 0;
+
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
       {/* Row header */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-semibold text-gray-600">Leg {index + 1}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-gray-600">Leg {index + 1}</span>
+          {/* Distance badge — shown when both airports resolve */}
+          {computedDistance > 0 && (
+            <span className="text-xs text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
+              {computedDistance.toLocaleString()} mi
+            </span>
+          )}
+          {/* Cash / Points toggle */}
+          <div className="flex rounded-full border border-gray-300 overflow-hidden text-xs font-medium">
+            <button
+              onClick={() => onChange({ ...leg, bookedWithPoints: false })}
+              className={`px-2.5 py-0.5 cursor-pointer transition-colors ${!leg.bookedWithPoints ? 'bg-blue-950 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+            >
+              Cash
+            </button>
+            <button
+              onClick={() => onChange({ ...leg, bookedWithPoints: true })}
+              className={`px-2.5 py-0.5 cursor-pointer transition-colors ${leg.bookedWithPoints ? 'bg-amber-500 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+            >
+              Points
+            </button>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           {/* Status chip — IS the dropdown */}
           <div className={`relative flex items-center rounded-full border text-xs font-medium transition-all ${chipClass} ${highlightClass}`}>
@@ -155,16 +187,18 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
           </div>
         )}
 
-        {/* Distance — classic + distance methods */}
-        {showDistance && (
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Distance (miles)</label>
-            <input
-              type="number" min="1" step="1"
-              value={leg.distanceMiles || ''}
-              placeholder="e.g. 954"
-              onChange={(e) => onChange({ ...leg, distanceMiles: parseInt(e.target.value) || 0 })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        {/* Airport inputs — classic + distance methods only, always same row */}
+        {showAirports && (
+          <div className="col-span-full flex gap-3">
+            <AirportInput
+              label="Origin"
+              value={leg.origin}
+              onChange={(iata) => onChange({ ...leg, origin: iata })}
+            />
+            <AirportInput
+              label="Destination"
+              value={leg.destination}
+              onChange={(iata) => onChange({ ...leg, destination: iata })}
             />
           </div>
         )}
@@ -179,6 +213,7 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
                 type="number" min="0" step="1"
                 value={leg.ticketPrice || ''}
                 placeholder="0"
+                onKeyDown={(e) => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault(); }}
                 onChange={(e) => onChange({ ...leg, ticketPrice: parseFloat(e.target.value) || 0 })}
                 className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
@@ -195,14 +230,14 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
       </div>
 
       {/* Partner booking channel callout */}
-      {isPartner && leg.bookingChannel === 'atmos' && (
+      {isPartner && leg.bookingChannel === 'atmos' && showFareClass && (
         <p className="mt-2 text-xs text-blue-500">
           Booking via Atmos earns significantly more on premium cabins (Business/First = 250%).
         </p>
       )}
 
       {/* Inline earnings */}
-      {leg.distanceMiles > 0 && (
+      {hasEarnings && (
         <div className="mt-3 flex gap-4 text-xs text-gray-500">
           <span>
             <span className="font-semibold text-blue-600">{earnings.miles.toLocaleString()}</span> miles

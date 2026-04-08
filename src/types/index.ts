@@ -62,8 +62,10 @@ export interface FlightLeg {
   airline: Airline;
   bookingChannel: BookingChannel;
   fareClass: FareClass;
-  distanceMiles: number;
+  origin: string;      // IATA code e.g. "SEA"
+  destination: string; // IATA code e.g. "HNL"
   ticketPrice: number;         // used for spend-based 2026 earning
+  bookedWithPoints: boolean;   // award tickets earn no miles or status points
   eliteOverride?: EliteTier;
 }
 

@@ -26,8 +26,8 @@ export default function CardSelector({ selectedIds, onChange }: Props) {
               onClick={() => toggle(card.id)}
               className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors cursor-pointer ${
                 selected
-                  ? 'bg-blue-600 border-blue-600 text-white'
-                  : 'bg-white border-gray-300 text-gray-700 hover:border-blue-400'
+                  ? 'bg-blue-950 border-blue-950 text-white'
+                  : 'bg-white border-gray-300 text-gray-700 hover:border-blue-900/40'
               }`}
             >
               {card.name}

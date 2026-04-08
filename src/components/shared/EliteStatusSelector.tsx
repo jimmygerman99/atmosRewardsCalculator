@@ -33,7 +33,7 @@ export default function EliteStatusSelector({ value, onChange, onHighlightFlight
         Applies a bonus multiplier to your Atmos Miles on flights. You can also{' '}
         <button
           onClick={onHighlightFlightChips}
-          className="underline decoration-dotted text-blue-400 hover:text-blue-600 cursor-pointer transition-colors"
+          className="underline decoration-dotted text-blue-800 hover:text-blue-950 cursor-pointer transition-colors"
         >
           override it per flight leg
         </button>
