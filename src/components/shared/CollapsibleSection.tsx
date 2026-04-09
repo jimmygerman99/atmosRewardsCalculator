@@ -36,12 +36,10 @@ export default function CollapsibleSection({ title, description, defaultOpen = t
         </div>
 
         <div className="flex items-center gap-4 shrink-0 ml-4">
-          {hasEarnings && (
-            <div className="text-right text-xs">
-              <p><span className="font-semibold text-blue-800">{miles.toLocaleString()}</span> <span className="text-gray-400">miles</span></p>
-              <p><span className="font-semibold text-emerald-600">{statusPoints.toLocaleString()}</span> <span className="text-gray-400">status pts</span></p>
-            </div>
-          )}
+          <div className={`text-right text-xs ${hasEarnings ? '' : 'invisible'}`}>
+            <p><span className="font-semibold text-blue-800">{miles.toLocaleString()}</span> <span className="text-gray-400">miles</span></p>
+            <p><span className="font-semibold text-emerald-600">{statusPoints.toLocaleString()}</span> <span className="text-gray-400">status pts</span></p>
+          </div>
           <span className={`text-gray-400 text-sm transition-transform duration-200 group-hover:text-gray-600 ${open ? 'rotate-180' : ''}`}>▼</span>
         </div>
       </button>

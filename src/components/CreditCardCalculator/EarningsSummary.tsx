@@ -5,6 +5,13 @@ interface Props {
   hasInputs: boolean;
 }
 
+function numFontClass(n: number): string {
+  const len = Math.abs(n).toLocaleString().replace(/,/g, '').length;
+  if (len <= 9)  return 'text-4xl';
+  if (len <= 12) return 'text-2xl';
+  return 'text-lg';
+}
+
 export default function EarningsSummary({ totals, hasInputs }: Props) {
   if (!hasInputs) {
     return (
@@ -20,11 +27,11 @@ export default function EarningsSummary({ totals, hasInputs }: Props) {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-gradient-to-br from-blue-950 to-blue-800 rounded-2xl p-5 text-center shadow-md">
           <p className="text-xs text-blue-300 uppercase tracking-widest font-medium mb-1">Atmos Miles</p>
-          <p className="text-4xl font-bold text-white">{totals.miles.toLocaleString()}</p>
+          <p className={`${numFontClass(totals.miles)} font-bold text-white leading-tight`}>{totals.miles.toLocaleString()}</p>
         </div>
         <div className="bg-gradient-to-br from-emerald-700 to-emerald-600 rounded-2xl p-5 text-center shadow-md">
           <p className="text-xs text-emerald-200 uppercase tracking-widest font-medium mb-1">Status Points</p>
-          <p className="text-4xl font-bold text-white">{totals.statusPoints.toLocaleString()}</p>
+          <p className={`${numFontClass(totals.statusPoints)} font-bold text-white leading-tight`}>{totals.statusPoints.toLocaleString()}</p>
         </div>
       </div>
     </div>

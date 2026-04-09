@@ -57,6 +57,7 @@ function DollarInput({ label, value, onChange, placeholder }: {
           value={value || ''}
           placeholder={placeholder ?? '0'}
           onKeyDown={blockInvalidKeys}
+          onWheel={(e) => e.currentTarget.blur()}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
@@ -77,6 +78,7 @@ function NumberInput({ label, value, onChange, placeholder, suffix }: {
           value={value || ''}
           placeholder={placeholder ?? '0'}
           onKeyDown={blockInvalidKeys}
+          onWheel={(e) => e.currentTarget.blur()}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${suffix ? 'pr-16' : ''}`}
         />

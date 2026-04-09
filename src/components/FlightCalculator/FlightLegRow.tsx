@@ -46,10 +46,15 @@ const GLOBAL_SENTINEL = '__global__';
 
 export default function FlightLegRow({ leg, earnings, index, globalElite, earningMethod, highlightChip, onChange, onRemove, canRemove }: Props) {
   const isPartner = leg.airline === 'partner';
-  const showFareClass = isPartner && (earningMethod === 'distance' || (earningMethod === 'spend' && leg.bookingChannel === 'partner'));
-  const showBookingChannel = isPartner && earningMethod !== 'segment';
-  const showAirports = earningMethod === 'distance' || (earningMethod === 'spend' && isPartner && leg.bookingChannel === 'partner');
-  const showTicketPrice = earningMethod === 'spend' && (!isPartner || leg.bookingChannel === 'atmos');
+  const partnerDirect = isPartner && leg.bookingChannel === 'partner';
+  // Fare class: only partner airlines (Alaska/Hawaiian have no cabin bonus)
+  const showFareClass = isPartner && (earningMethod === 'distance' || partnerDirect);
+  // Booking channel: always show for partner (direct overrides even segment/spend methods)
+  const showBookingChannel = isPartner;
+  // Airports: distance (all airlines) OR any partner-direct (method is overridden to distance)
+  const showAirports = earningMethod === 'distance' || partnerDirect;
+  // Ticket price: spend only, and not partner-direct (partner-direct ignores spend method)
+  const showTicketPrice = earningMethod === 'spend' && !partnerDirect;
   const hasOverride = leg.eliteOverride !== undefined;
   const effectiveElite = leg.eliteOverride ?? globalElite;
 
@@ -153,7 +158,7 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
           </select>
         </div>
 
-        {/* Fare Class — classic method only */}
+        {/* Fare Class — distance method (all airlines) or spend+partner-direct */}
         {showFareClass && (
           <div>
             <label className="block text-xs text-gray-500 mb-1">Fare Class</label>
@@ -215,6 +220,7 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
                 value={leg.ticketPrice || ''}
                 placeholder="0"
                 onKeyDown={(e) => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault(); }}
+                onWheel={(e) => e.currentTarget.blur()}
                 onChange={(e) => onChange({ ...leg, ticketPrice: parseFloat(e.target.value) || 0 })}
                 className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
@@ -222,18 +228,24 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
           </div>
         )}
 
-        {/* Segment method: no inputs beyond airline, just a note */}
-        {earningMethod === 'segment' && (
+        {/* Segment method note — hidden for partner-direct (method is overridden) */}
+        {earningMethod === 'segment' && !partnerDirect && (
           <div className="flex items-end pb-2">
             <p className="text-xs text-gray-400">500 pts earned for this segment automatically.</p>
           </div>
         )}
       </div>
 
-      {/* Partner booking channel callout */}
-      {isPartner && leg.bookingChannel === 'atmos' && (
+      {/* Partner via Atmos distance callout — cabin bonuses only apply under distance method */}
+      {isPartner && leg.bookingChannel === 'atmos' && earningMethod === 'distance' && (
         <p className="mt-2 text-xs text-blue-500">
           Booking via Atmos earns significantly more on premium cabins (Business/First = 250%).
+        </p>
+      )}
+      {/* Partner direct warning — method is always overridden to distance */}
+      {partnerDirect && earningMethod !== 'distance' && (
+        <p className="mt-2 text-xs text-amber-600">
+          Partner direct bookings always earn based on fare class × distance — your selected method is overridden.
         </p>
       )}
 

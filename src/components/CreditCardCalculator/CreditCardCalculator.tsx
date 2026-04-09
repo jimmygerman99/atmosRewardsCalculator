@@ -52,6 +52,7 @@ export default function AtmosCalculator() {
   const [selectedCardIds, setSelectedCardIds] = useLocalStorage<string[]>('selectedCardIds', []);
   const [spendMap, setSpendMap] = useLocalStorage<Record<string, CardSpend>>('spendMap', {});
   const [partnerSpend, setPartnerSpend] = useLocalStorage<PartnerSpend>('partnerSpend', defaultPartnerSpend);
+  const [showResetModal, setShowResetModal] = useState(false);
   const [highlightChips, setHighlightChips] = useState(false);
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -62,7 +63,6 @@ export default function AtmosCalculator() {
   }, []);
 
   function handleReset() {
-    if (!window.confirm('Reset all inputs? This will clear everything and cannot be undone.')) return;
     setElite('none');
     setEarningMethod('distance');
     setLegs([defaultLeg()]);
@@ -70,6 +70,7 @@ export default function AtmosCalculator() {
     setSelectedCardIds([]);
     setSpendMap({});
     setPartnerSpend(defaultPartnerSpend);
+    setShowResetModal(false);
   }
 
   function handleCardChange(ids: string[]) {
@@ -121,7 +122,7 @@ export default function AtmosCalculator() {
             Estimate the Atmos Miles and Status Points you can earn from flights, portal purchases, and credit card spending.
           </p>
           <button
-            onClick={handleReset}
+            onClick={() => setShowResetModal(true)}
             className="absolute top-4 right-4 text-xs text-blue-300 hover:text-white border border-blue-700 hover:border-blue-400 rounded-lg px-3 py-1.5 transition-colors cursor-pointer"
           >
             Reset all
@@ -198,6 +199,38 @@ export default function AtmosCalculator() {
       {hasAnyInput && <StatusProgressBar statusPoints={totals.statusPoints} />}
 
       <SupportFooter />
+
+      {/* Reset confirmation modal */}
+      {showResetModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowResetModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold text-gray-900 mb-2">Reset everything?</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              This will clear all flights, card spending, and partner purchases. This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="flex-1 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReset}
+                className="flex-1 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors cursor-pointer"
+              >
+                Reset all
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

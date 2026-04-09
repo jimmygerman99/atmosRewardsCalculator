@@ -4,7 +4,6 @@ import type {
   CardEarnings,
   FlightLeg,
   FlightLegEarnings,
-  AlaskaFareClass,
   PartnerFareClass,
   EliteTier,
   EarningMethod2026,
@@ -13,12 +12,10 @@ import type {
   TotalEarnings,
 } from '../types';
 import {
-  ALASKA_FARE_MULTIPLIER,
   PARTNER_ATMOS_MULTIPLIER,
   PARTNER_DIRECT_MULTIPLIER,
   ELITE_BONUS,
   MIN_FLIGHT_POINTS,
-  EARNING_2026_DISTANCE_RATE,
   EARNING_2026_SPEND_RATE,
   EARNING_2026_SEGMENT_RATE,
 } from '../data/flights';
@@ -47,10 +44,8 @@ export function calculateCardEarnings(card: CreditCard, spend: CardSpend): CardE
 
 // ── Flights ───────────────────────────────────────────────────────────────────
 
+// Only called for partner airlines
 function getFareMultiplier(leg: FlightLeg): number {
-  if (leg.airline === 'alaska' || leg.airline === 'hawaiian') {
-    return ALASKA_FARE_MULTIPLIER[leg.fareClass as AlaskaFareClass] ?? 1.0;
-  }
   const map = leg.bookingChannel === 'atmos' ? PARTNER_ATMOS_MULTIPLIER : PARTNER_DIRECT_MULTIPLIER;
   return map[leg.fareClass as PartnerFareClass] ?? 0.5;
 }
@@ -66,7 +61,7 @@ export function calculateFlightEarnings(
   // ── Spend method ──
   if (method === 'spend') {
     // Partner booked directly on partner's site → doesn't qualify for 5 pts/$1;
-    // falls back to partner direct fare-class multiplier × distance
+    // falls back to partner direct fare-class multiplier × distance (same for all methods)
     if (leg.airline === 'partner' && leg.bookingChannel === 'partner') {
       if (!leg.origin || !leg.destination) return empty;
       const distanceMiles = haversineDistance(leg.origin, leg.destination);
@@ -76,28 +71,30 @@ export function calculateFlightEarnings(
       return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
     }
     // Alaska/Hawaiian, or partner booked via Atmos → 5 pts/$1
+    // Points bookings: 0 miles, status points still earned from ticket price
     if (!leg.ticketPrice) return empty;
     const baseMiles = (leg.ticketPrice * EARNING_2026_SPEND_RATE) || 0;
     const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
     return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
   }
 
-  // ── Segment method — distance not needed ──
-  if (method === 'segment') {
+  // ── Segment method ──
+  // Partner direct overrides the selected method — always falls back to distance calc
+  if (method === 'segment' && !(leg.airline === 'partner' && leg.bookingChannel === 'partner')) {
     const baseMiles = EARNING_2026_SEGMENT_RATE;
     const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
     return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
   }
 
-  // ── Distance method — requires valid origin + destination ──
+  // ── Distance method (and partner-direct fallback from spend/segment) ──
   if (!leg.origin || !leg.destination) return empty;
   const distanceMiles = haversineDistance(leg.origin, leg.destination);
   if (!distanceMiles) return empty;
 
-  // Partner airlines use fare class multiplier × distance; Alaska/Hawaiian = flat 1 pt/mile
+  // Alaska/Hawaiian: flat 1 pt/mile (no cabin bonus); partner: fare class multiplier × distance
   const rawBase = leg.airline === 'partner'
     ? (distanceMiles * getFareMultiplier(leg)) || 0
-    : (distanceMiles * EARNING_2026_DISTANCE_RATE) || 0;
+    : distanceMiles;
 
   const baseMiles = Math.max(rawBase, MIN_FLIGHT_POINTS);
   const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;

@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Remove number input spin buttons and prevent scroll-to-increment */
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 html {
   background-color: #0a1628; /* matches darkest gradient stop — fills overscroll areas */
 }

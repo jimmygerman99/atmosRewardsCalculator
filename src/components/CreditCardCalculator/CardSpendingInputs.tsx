@@ -39,6 +39,7 @@ export default function CardSpendingInputs({ card, spend, onChange }: Props) {
               step="1"
               value={spend.alaskaHawaiianFlights || ''}
               placeholder="0"
+              onWheel={(e) => e.currentTarget.blur()}
               onChange={(e) => handleChange('alaskaHawaiianFlights', e.target.value)}
               className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -58,6 +59,7 @@ export default function CardSpendingInputs({ card, spend, onChange }: Props) {
               step="1"
               value={spend.other || ''}
               placeholder="0"
+              onWheel={(e) => e.currentTarget.blur()}
               onChange={(e) => handleChange('other', e.target.value)}
               className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
