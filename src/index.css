@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
+html {
+  background-color: #0a1628; /* matches darkest gradient stop — fills overscroll areas */
+}
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-color: #f1f5f9; /* slate-100 */
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(59, 130, 246, 0.18) 0%, transparent 70%),
+    linear-gradient(160deg, #0a1628 0%, #0f2347 45%, #091022 100%);
+  background-attachment: fixed;
 }

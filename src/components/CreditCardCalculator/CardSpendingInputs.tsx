@@ -13,7 +13,7 @@ export default function CardSpendingInputs({ card, spend, onChange }: Props) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+    <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-lg">
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="font-semibold text-gray-800">{card.name}</h3>

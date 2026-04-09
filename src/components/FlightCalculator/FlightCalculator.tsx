@@ -56,7 +56,7 @@ export default function FlightCalculator({ legs, elite, earningMethod, highlight
 
     return (
       <section className="mb-8">
-        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-lg">
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex-1 min-w-32">
               <label className="block text-xs text-gray-500 mb-1">Number of segments</label>

@@ -27,9 +27,9 @@ const TIER_SELECTED: Record<EliteTier, string> = {
 
 export default function EliteStatusSelector({ value, onChange, onHighlightFlightChips }: Props) {
   return (
-    <div className="mb-8">
+    <div>
       <h2 className="text-lg font-semibold text-gray-700 mb-1">Elite Status</h2>
-      <p className="text-xs text-gray-400 mb-3">
+      <p className="text-xs text-gray-500 mb-3">
         Applies a bonus multiplier to your Atmos Miles on flights. You can also{' '}
         <button
           onClick={onHighlightFlightChips}
@@ -39,12 +39,12 @@ export default function EliteStatusSelector({ value, onChange, onHighlightFlight
         </button>
         {' '}if needed.
       </p>
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-5 gap-2">
         {TIERS.map((tier) => (
           <button
             key={tier}
             onClick={() => onChange(tier)}
-            className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors cursor-pointer ${
+            className={`py-2 rounded-full border text-sm font-medium transition-colors cursor-pointer text-center ${
               value === tier ? TIER_SELECTED[tier] : TIER_COLORS[tier] + ' hover:opacity-80'
             }`}
           >

@@ -58,48 +58,50 @@ function getFareMultiplier(leg: FlightLeg): number {
 export function calculateFlightEarnings(
   leg: FlightLeg,
   elite: EliteTier,
-  method: EarningMethod2026 = 'classic'
+  method: EarningMethod2026 = 'distance'
 ): FlightLegEarnings {
   const empty: FlightLegEarnings = { legId: leg.id, baseMiles: 0, miles: 0, statusPoints: 0 };
   const eliteBonus = ELITE_BONUS[elite] ?? 0;
 
-  // ── 2026 spend method — distance not needed ──
+  // ── Spend method ──
   if (method === 'spend') {
+    // Partner booked directly on partner's site → doesn't qualify for 5 pts/$1;
+    // falls back to partner direct fare-class multiplier × distance
+    if (leg.airline === 'partner' && leg.bookingChannel === 'partner') {
+      if (!leg.origin || !leg.destination) return empty;
+      const distanceMiles = haversineDistance(leg.origin, leg.destination);
+      if (!distanceMiles) return empty;
+      const baseMiles = (distanceMiles * getFareMultiplier(leg)) || 0;
+      const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
+      return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
+    }
+    // Alaska/Hawaiian, or partner booked via Atmos → 5 pts/$1
     if (!leg.ticketPrice) return empty;
     const baseMiles = (leg.ticketPrice * EARNING_2026_SPEND_RATE) || 0;
     const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
     return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
   }
 
-  // ── 2026 segment method — distance not needed ──
+  // ── Segment method — distance not needed ──
   if (method === 'segment') {
     const baseMiles = EARNING_2026_SEGMENT_RATE;
     const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
     return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
   }
 
-  // ── Classic & Distance methods — require valid origin + destination ──
+  // ── Distance method — requires valid origin + destination ──
   if (!leg.origin || !leg.destination) return empty;
   const distanceMiles = haversineDistance(leg.origin, leg.destination);
   if (!distanceMiles) return empty;
 
-  // ── 2026 distance method ──
-  if (method === 'distance') {
-    const baseMiles = (distanceMiles * EARNING_2026_DISTANCE_RATE) || 0;
-    const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
-    return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
-  }
+  // Partner airlines use fare class multiplier × distance; Alaska/Hawaiian = flat 1 pt/mile
+  const rawBase = leg.airline === 'partner'
+    ? (distanceMiles * getFareMultiplier(leg)) || 0
+    : (distanceMiles * EARNING_2026_DISTANCE_RATE) || 0;
 
-  // ── Classic (current) method ──
-  const multiplier = getFareMultiplier(leg);
-  const rawBase = (distanceMiles * multiplier) || 0;
-  const baseMiles =
-    leg.airline !== 'partner' ? Math.max(rawBase, MIN_FLIGHT_POINTS) : rawBase;
-
+  const baseMiles = Math.max(rawBase, MIN_FLIGHT_POINTS);
   const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
-  const statusPoints = Math.round(baseMiles) || 0;
-
-  return { legId: leg.id, baseMiles, miles, statusPoints };
+  return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
 }
 
 // ── Partner / Portal ──────────────────────────────────────────────────────────

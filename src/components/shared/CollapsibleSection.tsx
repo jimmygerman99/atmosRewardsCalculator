@@ -14,19 +14,23 @@ export default function CollapsibleSection({ title, description, defaultOpen = t
   const hasEarnings = miles > 0 || statusPoints > 0;
 
   return (
-    <div className={`rounded-2xl border transition-colors mb-4 shadow-sm ${hasEarnings ? 'border-blue-900/20 bg-white' : 'border-gray-200 bg-white'}`}>
+    <div className={`rounded-2xl border bg-white mb-4 overflow-hidden transition-all shadow-xl ${
+      hasEarnings ? 'border-blue-200 shadow-blue-950/30' : 'border-gray-100 shadow-slate-900/20'
+    }`}>
+      {/* Colored left accent bar when active */}
+      <div className={`h-1 w-full transition-colors ${hasEarnings ? 'bg-gradient-to-r from-blue-900 to-blue-600' : 'bg-transparent'}`} />
+
       {/* Header — always visible */}
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-5 py-4 text-left cursor-pointer group"
       >
         <div className="flex items-center gap-3">
-          {/* Active dot */}
           <span className={`w-2 h-2 rounded-full shrink-0 transition-colors ${hasEarnings ? 'bg-blue-900' : 'bg-gray-300'}`} />
           <div>
             <p className={`text-base font-semibold transition-colors ${hasEarnings ? 'text-blue-950' : 'text-gray-700'}`}>{title}</p>
             {!open && !hasEarnings && (
-              <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{description}</p>
             )}
           </div>
         </div>
@@ -42,10 +46,9 @@ export default function CollapsibleSection({ title, description, defaultOpen = t
         </div>
       </button>
 
-      {/* Collapsible content */}
       {open && (
         <div className="px-5 pb-5">
-          {!hasEarnings && <p className="text-xs text-gray-400 mb-4">{description}</p>}
+          {!hasEarnings && <p className="text-xs text-gray-500 mb-4">{description}</p>}
           {children}
         </div>
       )}

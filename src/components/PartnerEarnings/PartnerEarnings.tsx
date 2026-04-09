@@ -19,7 +19,7 @@ interface CategoryRowProps {
 function CategoryRow({ label, description, icon, children, miles, statusPoints }: CategoryRowProps) {
   const hasEarnings = miles > 0 || statusPoints > 0;
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+    <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-lg">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="text-lg">{icon}</span>

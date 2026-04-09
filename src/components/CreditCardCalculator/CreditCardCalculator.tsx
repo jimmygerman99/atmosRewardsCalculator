@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import type { CardSpend, FlightLeg, FlightLegEarnings, EliteTier, EarningMethod2026, PartnerSpend } from '../../types';
 import { CARD_MAP } from '../../data/cards';
 import { SHOPPING_DEFAULT_MILES_PER_DOLLAR } from '../../data/partners';
@@ -11,6 +12,8 @@ import PartnerEarnings from '../PartnerEarnings/PartnerEarnings';
 import CardSelector from './CardSelector';
 import CardSpendingInputs from './CardSpendingInputs';
 import EarningsSummary from './EarningsSummary';
+import StatusProgressBar from '../StatusProgressBar/StatusProgressBar';
+import SupportFooter from '../SupportFooter/SupportFooter';
 
 function defaultSpend(cardId: string): CardSpend {
   return { cardId, alaskaHawaiianFlights: 0, other: 0 };
@@ -42,13 +45,13 @@ const defaultPartnerSpend: PartnerSpend = {
 };
 
 export default function AtmosCalculator() {
-  const [elite, setElite] = useState<EliteTier>('none');
-  const [earningMethod, setEarningMethod] = useState<EarningMethod2026>('classic');
-  const [legs, setLegs] = useState<FlightLeg[]>([defaultLeg()]);
+  const [elite, setElite] = useLocalStorage<EliteTier>('elite', 'none');
+  const [earningMethod, setEarningMethod] = useLocalStorage<EarningMethod2026>('earningMethod', 'distance');
+  const [legs, setLegs] = useLocalStorage<FlightLeg[]>('legs', [defaultLeg()]);
   const [flightEarnings, setFlightEarnings] = useState<FlightLegEarnings[]>([]);
-  const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
-  const [spendMap, setSpendMap] = useState<Record<string, CardSpend>>({});
-  const [partnerSpend, setPartnerSpend] = useState<PartnerSpend>(defaultPartnerSpend);
+  const [selectedCardIds, setSelectedCardIds] = useLocalStorage<string[]>('selectedCardIds', []);
+  const [spendMap, setSpendMap] = useLocalStorage<Record<string, CardSpend>>('spendMap', {});
+  const [partnerSpend, setPartnerSpend] = useLocalStorage<PartnerSpend>('partnerSpend', defaultPartnerSpend);
   const [highlightChips, setHighlightChips] = useState(false);
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -57,6 +60,17 @@ export default function AtmosCalculator() {
     setHighlightChips(true);
     highlightTimer.current = setTimeout(() => setHighlightChips(false), 2000);
   }, []);
+
+  function handleReset() {
+    if (!window.confirm('Reset all inputs? This will clear everything and cannot be undone.')) return;
+    setElite('none');
+    setEarningMethod('distance');
+    setLegs([defaultLeg()]);
+    setFlightEarnings([]);
+    setSelectedCardIds([]);
+    setSpendMap({});
+    setPartnerSpend(defaultPartnerSpend);
+  }
 
   function handleCardChange(ids: string[]) {
     setSelectedCardIds(ids);
@@ -99,13 +113,19 @@ export default function AtmosCalculator() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
       {/* Header */}
-      <div className="mb-8 rounded-2xl overflow-hidden shadow-md">
-        <div className="bg-gradient-to-br from-blue-950 to-blue-800 px-8 py-8 text-center">
+      <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+        <div className="bg-gradient-to-br from-blue-950 to-blue-800 px-8 py-8 text-center relative">
           <p className="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-2">Alaska · Hawaiian · Atmos</p>
           <h1 className="text-3xl font-bold text-white mb-2">Atmos Rewards Calculator</h1>
           <p className="text-blue-200 text-sm max-w-md mx-auto">
             Estimate the Atmos Miles and Status Points you can earn from flights, portal purchases, and credit card spending.
           </p>
+          <button
+            onClick={handleReset}
+            className="absolute top-4 right-4 text-xs text-blue-300 hover:text-white border border-blue-700 hover:border-blue-400 rounded-lg px-3 py-1.5 transition-colors cursor-pointer"
+          >
+            Reset all
+          </button>
         </div>
         <div className="bg-white px-8 py-5">
           <EliteStatusSelector value={elite} onChange={setElite} onHighlightFlightChips={handleHighlightFlightChips} />
@@ -171,10 +191,13 @@ export default function AtmosCalculator() {
         )}
       </CollapsibleSection>
 
-      <hr className="border-gray-200" />
-
       {/* Summary */}
       <EarningsSummary totals={totals} hasInputs={hasAnyInput} />
+
+      {/* Status progress */}
+      {hasAnyInput && <StatusProgressBar statusPoints={totals.statusPoints} />}
+
+      <SupportFooter />
     </div>
   );
 }

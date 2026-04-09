@@ -7,14 +7,9 @@ interface Props {
 
 const OPTIONS: { id: EarningMethod2026; label: string; description: string }[] = [
   {
-    id: 'classic',
-    label: 'Classic',
-    description: 'Fare class multipliers apply (current default)',
-  },
-  {
     id: 'distance',
     label: 'Distance',
-    description: '1 pt per mile — no fare class bonus, no minimum',
+    description: '1 pt per mile flown',
   },
   {
     id: 'spend',
@@ -33,12 +28,12 @@ export default function EarningMethodSelector({ value, onChange }: Props) {
     <div className="mb-6 p-4 bg-blue-950/5 border border-blue-900/15 rounded-xl">
       <div className="flex items-center gap-2 mb-2">
         <span className="text-xs font-semibold text-blue-900 uppercase tracking-wide">2026 Earning Method</span>
-        <span className="text-xs bg-blue-900 text-blue-100 px-2 py-0.5 rounded-full font-medium">Coming 2026</span>
+        <span className="text-xs bg-blue-900 text-blue-100 px-2 py-0.5 rounded-full font-medium">New in 2026</span>
       </div>
       <p className="text-xs text-blue-800/70 mb-3">
-        Choose how you earn points and status on flights. One method applies to all flights for the year.
+        Choose how you earn points on flights. You can change your selection once per calendar year.
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {OPTIONS.map((opt) => (
           <button
             key={opt.id}

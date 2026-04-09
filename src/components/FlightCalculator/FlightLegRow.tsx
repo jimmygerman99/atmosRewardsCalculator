@@ -46,9 +46,10 @@ const GLOBAL_SENTINEL = '__global__';
 
 export default function FlightLegRow({ leg, earnings, index, globalElite, earningMethod, highlightChip, onChange, onRemove, canRemove }: Props) {
   const isPartner = leg.airline === 'partner';
-  const showFareClass = earningMethod === 'classic';
-  const showAirports = earningMethod === 'classic' || earningMethod === 'distance';
-  const showTicketPrice = earningMethod === 'spend';
+  const showFareClass = isPartner && (earningMethod === 'distance' || (earningMethod === 'spend' && leg.bookingChannel === 'partner'));
+  const showBookingChannel = isPartner && earningMethod !== 'segment';
+  const showAirports = earningMethod === 'distance' || (earningMethod === 'spend' && isPartner && leg.bookingChannel === 'partner');
+  const showTicketPrice = earningMethod === 'spend' && (!isPartner || leg.bookingChannel === 'atmos');
   const hasOverride = leg.eliteOverride !== undefined;
   const effectiveElite = leg.eliteOverride ?? globalElite;
 
@@ -77,7 +78,7 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
   const hasEarnings = earnings.miles > 0 || earnings.statusPoints > 0;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+    <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-lg">
       {/* Row header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -172,8 +173,8 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
           </div>
         )}
 
-        {/* Booking channel — partner + classic only */}
-        {isPartner && showFareClass && (
+        {/* Booking channel — partner airlines, non-segment methods */}
+        {showBookingChannel && (
           <div>
             <label className="block text-xs text-gray-500 mb-1">Booked through</label>
             <select
@@ -230,7 +231,7 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
       </div>
 
       {/* Partner booking channel callout */}
-      {isPartner && leg.bookingChannel === 'atmos' && showFareClass && (
+      {isPartner && leg.bookingChannel === 'atmos' && (
         <p className="mt-2 text-xs text-blue-500">
           Booking via Atmos earns significantly more on premium cabins (Business/First = 250%).
         </p>

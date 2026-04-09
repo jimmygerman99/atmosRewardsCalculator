@@ -55,7 +55,7 @@ export type EliteTier = 'none' | 'silver' | 'gold' | 'platinum' | 'titanium';
  * 2026 earning method choice — applies to both Atmos Miles and Status Points.
  * Members pick one method per year.
  */
-export type EarningMethod2026 = 'classic' | 'distance' | 'spend' | 'segment';
+export type EarningMethod2026 = 'distance' | 'spend' | 'segment';
 
 export interface FlightLeg {
   id: string;
