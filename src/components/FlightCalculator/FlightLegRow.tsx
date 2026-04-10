@@ -53,8 +53,10 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
   const showBookingChannel = isPartner;
   // Airports: distance (all airlines) OR any partner-direct (method is overridden to distance)
   const showAirports = earningMethod === 'distance' || partnerDirect;
-  // Ticket price: spend only, and not partner-direct (partner-direct ignores spend method)
-  const showTicketPrice = earningMethod === 'spend' && !partnerDirect;
+  // Ticket price: spend method, cash ticket, not partner-direct
+  const showTicketPrice = earningMethod === 'spend' && !partnerDirect && !leg.bookedWithPoints;
+  // Points redeemed: spend method, award ticket, not partner-direct (1 SP per 20 pts redeemed)
+  const showPointsRedeemed = earningMethod === 'spend' && !partnerDirect && leg.bookedWithPoints;
   const hasOverride = leg.eliteOverride !== undefined;
   const effectiveElite = leg.eliteOverride ?? globalElite;
 
@@ -225,6 +227,22 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
                 className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
+          </div>
+        )}
+
+        {/* Points redeemed — spend method, award ticket */}
+        {showPointsRedeemed && (
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Points redeemed</label>
+            <input
+              type="number" min="0" step="1000"
+              value={leg.pointsRedeemed || ''}
+              placeholder="0"
+              onKeyDown={(e) => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault(); }}
+              onWheel={(e) => e.currentTarget.blur()}
+              onChange={(e) => onChange({ ...leg, pointsRedeemed: parseFloat(e.target.value) || 0 })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
           </div>
         )}
 

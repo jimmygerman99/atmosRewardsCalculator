@@ -22,6 +22,7 @@ function newLeg(airline: FlightLeg['airline'] = 'alaska'): FlightLeg {
         origin: '',
         destination: '',
         ticketPrice: 0,
+        pointsRedeemed: 0,
         bookedWithPoints: false,
     };
 }

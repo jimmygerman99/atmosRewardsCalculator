@@ -28,6 +28,7 @@ function defaultLeg(): FlightLeg {
     origin: '',
     destination: '',
     ticketPrice: 0,
+    pointsRedeemed: 0,
     bookedWithPoints: false,
   };
 }

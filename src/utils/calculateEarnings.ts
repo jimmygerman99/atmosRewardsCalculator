@@ -70,11 +70,15 @@ export function calculateFlightEarnings(
       const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
       return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
     }
-    // Alaska/Hawaiian, or partner booked via Atmos → 5 pts/$1
-    // Points bookings: 0 miles, status points still earned from ticket price
+    // Alaska/Hawaiian, or partner booked via Atmos → 5 pts/$1 (cash) or 1 SP/20 pts redeemed (award)
+    if (leg.bookedWithPoints) {
+      // Award flight: 0 miles, 1 status point per 20 points redeemed
+      const statusPoints = Math.floor((leg.pointsRedeemed || 0) / 20);
+      return { legId: leg.id, baseMiles: 0, miles: 0, statusPoints };
+    }
     if (!leg.ticketPrice) return empty;
     const baseMiles = (leg.ticketPrice * EARNING_2026_SPEND_RATE) || 0;
-    const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
+    const miles = Math.round(baseMiles * (1 + eliteBonus)) || 0;
     return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
   }
 

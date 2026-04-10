@@ -64,8 +64,9 @@ export interface FlightLeg {
   fareClass: FareClass;
   origin: string;      // IATA code e.g. "SEA"
   destination: string; // IATA code e.g. "HNL"
-  ticketPrice: number;         // used for spend-based 2026 earning
-  bookedWithPoints: boolean;   // award tickets earn no miles or status points
+  ticketPrice: number;         // used for spend-based 2026 earning (cash tickets)
+  pointsRedeemed: number;      // used for spend-based 2026 earning (award tickets: 1 SP per 20 pts)
+  bookedWithPoints: boolean;   // award tickets earn no miles; status points from pointsRedeemed (spend) or distance
   eliteOverride?: EliteTier;
 }
 
