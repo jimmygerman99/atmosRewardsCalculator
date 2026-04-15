@@ -4,6 +4,7 @@ import type {
   CardEarnings,
   FlightLeg,
   FlightLegEarnings,
+  AlaskaFareClass,
   PartnerFareClass,
   EliteTier,
   EarningMethod2026,
@@ -12,6 +13,8 @@ import type {
   TotalEarnings,
 } from '../types';
 import {
+  ALASKA_FARE_MULTIPLIER,
+  HAWAIIAN_FARE_MULTIPLIER,
   PARTNER_ATMOS_MULTIPLIER,
   PARTNER_DIRECT_MULTIPLIER,
   ELITE_BONUS,
@@ -37,7 +40,8 @@ export function calculateCardEarnings(card: CreditCard, spend: CardSpend): CardE
     spend.other * card.earningRates.other;
 
   const totalSpend = spend.alaskaHawaiianFlights + spend.other;
-  const statusPoints = Math.floor(totalSpend * card.statusPointsPerDollar);
+  const anniversaryBonus = spend.includeAnniversaryBonus ? (card.anniversaryStatusPoints ?? 0) : 0;
+  const statusPoints = Math.floor(totalSpend * card.statusPointsPerDollar) + anniversaryBonus;
 
   return { cardId: card.id, miles, statusPoints, totalSpend };
 }
@@ -48,6 +52,16 @@ export function calculateCardEarnings(card: CreditCard, spend: CardSpend): CardE
 function getFareMultiplier(leg: FlightLeg): number {
   const map = leg.bookingChannel === 'atmos' ? PARTNER_ATMOS_MULTIPLIER : PARTNER_DIRECT_MULTIPLIER;
   return map[leg.fareClass as PartnerFareClass] ?? 0.5;
+}
+
+function applyRoundTrip(result: FlightLegEarnings, roundTrip: boolean): FlightLegEarnings {
+  if (!roundTrip) return result;
+  return {
+    ...result,
+    baseMiles: result.baseMiles * 2,
+    miles: result.miles * 2,
+    statusPoints: result.statusPoints * 2,
+  };
 }
 
 export function calculateFlightEarnings(
@@ -68,18 +82,18 @@ export function calculateFlightEarnings(
       if (!distanceMiles) return empty;
       const baseMiles = (distanceMiles * getFareMultiplier(leg)) || 0;
       const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
-      return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
+      return applyRoundTrip({ legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 }, leg.roundTrip);
     }
     // Alaska/Hawaiian, or partner booked via Atmos → 5 pts/$1 (cash) or 1 SP/20 pts redeemed (award)
     if (leg.bookedWithPoints) {
       // Award flight: 0 miles, 1 status point per 20 points redeemed
       const statusPoints = Math.floor((leg.pointsRedeemed || 0) / 20);
-      return { legId: leg.id, baseMiles: 0, miles: 0, statusPoints };
+      return applyRoundTrip({ legId: leg.id, baseMiles: 0, miles: 0, statusPoints }, leg.roundTrip);
     }
     if (!leg.ticketPrice) return empty;
     const baseMiles = (leg.ticketPrice * EARNING_2026_SPEND_RATE) || 0;
     const miles = Math.round(baseMiles * (1 + eliteBonus)) || 0;
-    return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
+    return applyRoundTrip({ legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 }, leg.roundTrip);
   }
 
   // ── Segment method ──
@@ -87,7 +101,7 @@ export function calculateFlightEarnings(
   if (method === 'segment' && !(leg.airline === 'partner' && leg.bookingChannel === 'partner')) {
     const baseMiles = EARNING_2026_SEGMENT_RATE;
     const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
-    return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
+    return applyRoundTrip({ legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 }, leg.roundTrip);
   }
 
   // ── Distance method (and partner-direct fallback from spend/segment) ──
@@ -95,14 +109,17 @@ export function calculateFlightEarnings(
   const distanceMiles = haversineDistance(leg.origin, leg.destination);
   if (!distanceMiles) return empty;
 
-  // Alaska/Hawaiian: flat 1 pt/mile (no cabin bonus); partner: fare class multiplier × distance
+  // Alaska/Hawaiian: fare class multiplier × distance; partner: same
+  const akHawaiianMultiplier = leg.airline === 'hawaiian'
+    ? (HAWAIIAN_FARE_MULTIPLIER[leg.fareClass as AlaskaFareClass] ?? 1.0)
+    : (ALASKA_FARE_MULTIPLIER[leg.fareClass as AlaskaFareClass] ?? 1.0);
   const rawBase = leg.airline === 'partner'
     ? (distanceMiles * getFareMultiplier(leg)) || 0
-    : distanceMiles;
+    : distanceMiles * akHawaiianMultiplier;
 
   const baseMiles = Math.max(rawBase, MIN_FLIGHT_POINTS);
   const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
-  return { legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 };
+  return applyRoundTrip({ legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 }, leg.roundTrip);
 }
 
 // ── Partner / Portal ──────────────────────────────────────────────────────────

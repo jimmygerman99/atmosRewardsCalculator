@@ -46,7 +46,7 @@ export default function CollapsibleSection({ title, description, defaultOpen = t
 
       {open && (
         <div className="px-5 pb-5">
-          {!hasEarnings && <p className="text-xs text-gray-500 mb-4">{description}</p>}
+          <p className="text-xs text-gray-500 mb-4">{description}</p>
           {children}
         </div>
       )}

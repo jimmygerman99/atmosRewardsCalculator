@@ -10,12 +10,14 @@ export interface CreditCard {
     other: number;                  // miles per $1
   };
   statusPointsPerDollar: number; // Summit = 0.5, others = 0.333...
+  anniversaryStatusPoints?: number; // e.g. Summit = 10,000
 }
 
 export interface CardSpend {
   cardId: string;
   alaskaHawaiianFlights: number; // dollars
   other: number;                  // dollars
+  includeAnniversaryBonus?: boolean;
 }
 
 export interface CardEarnings {
@@ -39,11 +41,12 @@ export type AlaskaFareClass =
 
 /** Fare classes for partner-operated flights */
 export type PartnerFareClass =
-  | 'economy_discount' // 25% direct / higher via Atmos
-  | 'economy'          // 50% direct / higher via Atmos
-  | 'premium_economy'  // 100% direct / higher via Atmos
+  | 'economy_discount' // 25% direct / 100% via Atmos
+  | 'economy'          // 50% direct / 100% via Atmos
+  | 'premium_economy'  // 100% direct / 150% via Atmos
   | 'business'         // 125% direct / 250% via Atmos
-  | 'first';           // 150% direct / 250% via Atmos
+  | 'domestic_first'   // 150% direct / 150% via Atmos
+  | 'first';           // 150% direct / 350% via Atmos (international)
 
 export type FareClass = AlaskaFareClass | PartnerFareClass;
 
@@ -67,6 +70,7 @@ export interface FlightLeg {
   ticketPrice: number;         // used for spend-based 2026 earning (cash tickets)
   pointsRedeemed: number;      // used for spend-based 2026 earning (award tickets: 1 SP per 20 pts)
   bookedWithPoints: boolean;   // award tickets earn no miles; status points from pointsRedeemed (spend) or distance
+  roundTrip: boolean;          // doubles all earnings
   eliteOverride?: EliteTier;
 }
 

@@ -1,5 +1,5 @@
 import type { FlightLeg, Airline, AlaskaFareClass, PartnerFareClass, FlightLegEarnings, EliteTier, EarningMethod2026 } from '../../types';
-import { ALASKA_FARE_LABELS, PARTNER_FARE_LABELS, ELITE_LABELS } from '../../data/flights';
+import { ALASKA_FARE_LABELS, HAWAIIAN_FARE_LABELS, PARTNER_FARE_LABELS, ELITE_LABELS } from '../../data/flights';
 import { haversineDistance } from '../../utils/haversine';
 import AirportInput from './AirportInput';
 
@@ -16,7 +16,9 @@ interface Props {
 }
 
 const ALASKA_FARE_CLASSES = Object.keys(ALASKA_FARE_LABELS) as AlaskaFareClass[];
+const HAWAIIAN_FARE_CLASSES = Object.keys(HAWAIIAN_FARE_LABELS) as AlaskaFareClass[];
 const PARTNER_FARE_CLASSES = Object.keys(PARTNER_FARE_LABELS) as PartnerFareClass[];
+const PARTNER_DIRECT_FARE_CLASSES = PARTNER_FARE_CLASSES.filter((fc) => fc !== 'domestic_first');
 const ALL_TIERS = Object.keys(ELITE_LABELS) as EliteTier[];
 
 // Soft chip style when inheriting global status
@@ -47,8 +49,8 @@ const GLOBAL_SENTINEL = '__global__';
 export default function FlightLegRow({ leg, earnings, index, globalElite, earningMethod, highlightChip, onChange, onRemove, canRemove }: Props) {
   const isPartner = leg.airline === 'partner';
   const partnerDirect = isPartner && leg.bookingChannel === 'partner';
-  // Fare class: only partner airlines (Alaska/Hawaiian have no cabin bonus)
-  const showFareClass = isPartner && (earningMethod === 'distance' || partnerDirect);
+  // Fare class: all airlines in distance mode; partner-direct overrides other methods
+  const showFareClass = earningMethod === 'distance' || (isPartner && partnerDirect);
   // Booking channel: always show for partner (direct overrides even segment/spend methods)
   const showBookingChannel = isPartner;
   // Airports: distance (all airlines) OR any partner-direct (method is overridden to distance)
@@ -111,6 +113,13 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
               Points
             </button>
           </div>
+          {/* Round trip toggle */}
+          <button
+            onClick={() => onChange({ ...leg, roundTrip: !leg.roundTrip })}
+            className={`text-xs px-2.5 py-0.5 rounded-full border font-medium cursor-pointer transition-colors ${leg.roundTrip ? 'bg-blue-950 text-white border-blue-950' : 'text-gray-500 border-gray-300 hover:bg-gray-100'}`}
+          >
+            Round trip
+          </button>
         </div>
         <div className="flex items-center gap-2">
           {/* Status chip — IS the dropdown */}
@@ -170,12 +179,16 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               {isPartner
-                ? PARTNER_FARE_CLASSES.map((fc) => (
+                ? (partnerDirect ? PARTNER_DIRECT_FARE_CLASSES : PARTNER_FARE_CLASSES).map((fc) => (
                     <option key={fc} value={fc}>{PARTNER_FARE_LABELS[fc]}</option>
                   ))
-                : ALASKA_FARE_CLASSES.map((fc) => (
-                    <option key={fc} value={fc}>{ALASKA_FARE_LABELS[fc]}</option>
-                  ))}
+                : leg.airline === 'hawaiian'
+                  ? HAWAIIAN_FARE_CLASSES.map((fc) => (
+                      <option key={fc} value={fc}>{HAWAIIAN_FARE_LABELS[fc]}</option>
+                    ))
+                  : ALASKA_FARE_CLASSES.map((fc) => (
+                      <option key={fc} value={fc}>{ALASKA_FARE_LABELS[fc]}</option>
+                    ))}
             </select>
           </div>
         )}
@@ -186,7 +199,11 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
             <label className="block text-xs text-gray-500 mb-1">Booked through</label>
             <select
               value={leg.bookingChannel}
-              onChange={(e) => onChange({ ...leg, bookingChannel: e.target.value as FlightLeg['bookingChannel'] })}
+              onChange={(e) => {
+                const channel = e.target.value as FlightLeg['bookingChannel'];
+                const fareClass = channel === 'partner' && leg.fareClass === 'domestic_first' ? 'first' : leg.fareClass;
+                onChange({ ...leg, bookingChannel: channel, fareClass });
+              }}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="atmos">Atmos / AlaskaAir.com</option>

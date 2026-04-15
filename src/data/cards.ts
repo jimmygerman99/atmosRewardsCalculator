@@ -22,6 +22,7 @@ export const CARDS: CreditCard[] = [
       other: 1,
     },
     statusPointsPerDollar: 1 / 2,
+    anniversaryStatusPoints: 10_000,
   },
   {
     id: 'business',

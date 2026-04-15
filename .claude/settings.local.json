@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.alaskaair.com)",
+      "WebFetch(domain:frequentmiler.com)",
+      "WebFetch(domain:awardwallet.com)",
+      "WebFetch(domain:thepointsguy.com)",
+      "WebFetch(domain:news.alaskaair.com)",
+      "WebFetch(domain:upgradedpoints.com)",
+      "WebFetch(domain:loyaltylobby.com)"
+    ]
+  }
+}

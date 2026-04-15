@@ -67,6 +67,24 @@ export default function CardSpendingInputs({ card, spend, onChange }: Props) {
           <p className="text-xs text-gray-400 mt-1">Earns 1x miles</p>
         </div>
       </div>
+
+      {card.anniversaryStatusPoints && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={spend.includeAnniversaryBonus ?? false}
+              onChange={(e) => onChange({ ...spend, includeAnniversaryBonus: e.target.checked })}
+              className="w-4 h-4 rounded accent-blue-900 cursor-pointer"
+            />
+            <div>
+              <span className="text-sm text-gray-700 font-medium">Include anniversary bonus</span>
+              <span className="ml-2 text-xs text-emerald-600 font-semibold">+{card.anniversaryStatusPoints.toLocaleString()} status pts</span>
+              <p className="text-xs text-gray-400">Awarded once per year on your card anniversary date</p>
+            </div>
+          </label>
+        </div>
+      )}
     </div>
   );
 }
