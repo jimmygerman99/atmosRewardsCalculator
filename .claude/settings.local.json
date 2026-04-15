@@ -8,7 +8,8 @@
       "WebFetch(domain:thepointsguy.com)",
       "WebFetch(domain:news.alaskaair.com)",
       "WebFetch(domain:upgradedpoints.com)",
-      "WebFetch(domain:loyaltylobby.com)"
+      "WebFetch(domain:loyaltylobby.com)",
+      "Bash(npx tsc *)"
     ]
   }
 }

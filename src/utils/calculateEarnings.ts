@@ -109,15 +109,18 @@ export function calculateFlightEarnings(
   const distanceMiles = haversineDistance(leg.origin, leg.destination);
   if (!distanceMiles) return empty;
 
-  // Alaska/Hawaiian: fare class multiplier × distance; partner: same
+  // Partner: fare class multiplier × distance, no minimum
+  if (leg.airline === 'partner') {
+    const baseMiles = (distanceMiles * getFareMultiplier(leg)) || 0;
+    const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
+    return applyRoundTrip({ legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 }, leg.roundTrip);
+  }
+
+  // Alaska/Hawaiian: apply 500-pt minimum to raw distance first, then scale by fare class multiplier
   const akHawaiianMultiplier = leg.airline === 'hawaiian'
     ? (HAWAIIAN_FARE_MULTIPLIER[leg.fareClass as AlaskaFareClass] ?? 1.0)
     : (ALASKA_FARE_MULTIPLIER[leg.fareClass as AlaskaFareClass] ?? 1.0);
-  const rawBase = leg.airline === 'partner'
-    ? (distanceMiles * getFareMultiplier(leg)) || 0
-    : distanceMiles * akHawaiianMultiplier;
-
-  const baseMiles = Math.max(rawBase, MIN_FLIGHT_POINTS);
+  const baseMiles = Math.max(distanceMiles, MIN_FLIGHT_POINTS) * akHawaiianMultiplier;
   const miles = leg.bookedWithPoints ? 0 : Math.round(baseMiles * (1 + eliteBonus)) || 0;
   return applyRoundTrip({ legId: leg.id, baseMiles, miles, statusPoints: Math.round(baseMiles) || 0 }, leg.roundTrip);
 }
