@@ -9,7 +9,9 @@
       "WebFetch(domain:news.alaskaair.com)",
       "WebFetch(domain:upgradedpoints.com)",
       "WebFetch(domain:loyaltylobby.com)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(curl -s https://davidmegginson.github.io/ourairports-data/airports.csv)",
+      "Bash(python3 scripts/build-airports.py)"
     ]
   }
 }

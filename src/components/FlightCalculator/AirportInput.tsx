@@ -8,19 +8,37 @@ interface Props {
   onChange: (iata: string) => void;
 }
 
+// Metro/city code aliases → real city name for search
+const CITY_ALIASES: Record<string, string> = {
+  NYC: 'New York',
+  CHI: 'Chicago',
+  LON: 'London',
+  PAR: 'Paris',
+  TYO: 'Tokyo',
+  OSA: 'Osaka',
+  MIL: 'Milan',
+  BUE: 'Buenos Aires',
+  WAS: 'Washington',
+  YTO: 'Toronto',
+  YMQ: 'Montreal',
+  REK: 'Reykjavik',
+  RIO: 'Rio de Janeiro',
+  SAO: 'São Paulo',
+};
+
 function search(query: string): Airport[] {
   const raw = query.trim();
   if (!raw) return [];
   const q = raw.toUpperCase();
-  const ql = raw.toLowerCase();
+  const aliasCity = CITY_ALIASES[q];           // e.g. "NYC" → "New York"
+  const ql = (aliasCity ?? raw).toLowerCase(); // search by alias city or raw query
 
   const iataMatches: Airport[] = [];
   const cityMatches: Airport[] = [];
   const nameMatches: Airport[] = [];
 
-  // Scan the full list — 4,500 airports is negligible for JS
   for (const airport of AIRPORTS) {
-    if (airport.iata.startsWith(q)) {
+    if (!aliasCity && airport.iata.startsWith(q)) {
       iataMatches.push(airport);
     } else if (airport.city.toLowerCase().includes(ql)) {
       cityMatches.push(airport);

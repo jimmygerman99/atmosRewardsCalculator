@@ -14,8 +14,8 @@ def main():
     seen_iata = set()
 
     for row in reader:
-        airport_type = row.get('type', '').strip()
-        if airport_type not in ('large_airport', 'medium_airport'):
+        # Only include airports with scheduled commercial service
+        if row.get('scheduled_service', '').strip() != 'yes':
             continue
 
         iata = row.get('iata_code', '').strip()

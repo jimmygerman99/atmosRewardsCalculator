@@ -29,31 +29,39 @@ function PayPalIcon() {
 
 export default function SupportFooter() {
     return (
-        <div className="mt-10 pb-10">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-xl shadow-slate-900/20 p-6 text-center">
-                <p className="text-2xl mb-2">☕</p>
-                <p className="text-sm font-semibold text-gray-700 mb-1">Enjoy the calculator?</p>
-                <p className="text-xs text-gray-500 mb-5 max-w-sm mx-auto">
-                    Recent college grad that's broke. Would greatly appreciate a coffee or drink! Tell me what drink to buy.
-                </p>
+        <>
+            <div className="mt-10 pb-10">
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-xl shadow-slate-900/20 p-6 text-center">
+                    <p className="text-2xl mb-2">☕</p>
+                    <p className="text-sm font-semibold text-gray-700 mb-1">Enjoy the calculator?</p>
+                    <p className="text-xs text-gray-500 mb-5 max-w-sm mx-auto">
+                        Recent college grad that's broke. Would greatly appreciate a coffee or drink! Tell me what drink to buy.
+                    </p>
 
-                <div className="flex justify-center gap-3">
-                    <button
-                        onClick={openVenmo}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-xs font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer shadow-sm"
-                    >
-                        <VenmoIcon />
-                        Venmo
-                    </button>
-                    <button
-                        onClick={openPayPal}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-xs font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer shadow-sm"
-                    >
-                        <PayPalIcon />
-                        PayPal
-                    </button>
+                    <div className="flex justify-center gap-3">
+                        <button
+                            onClick={openVenmo}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-xs font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer shadow-sm"
+                        >
+                            <VenmoIcon />
+                            Venmo
+                        </button>
+                        <button
+                            onClick={openPayPal}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-xs font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer shadow-sm"
+                        >
+                            <PayPalIcon />
+                            PayPal
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <p className="mt-6 text-center text-[11px] text-gray-400 leading-relaxed max-w-md mx-auto">
+                This calculator is an independent, unofficial tool and is not affiliated with, endorsed by, or sponsored by Atmos
+                Rewards, Alaska Airlines, or Hawaiian Airlines. All program details are based on publicly available information
+                and may not reflect the most current terms.
+            </p>
+        </>
     );
 }
