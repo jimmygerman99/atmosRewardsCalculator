@@ -1,9 +1,10 @@
 import type { PartnerSpend, PartnerEarningsResult } from '../../types';
-import { SHOPPING_DEFAULT_MILES_PER_DOLLAR, CAR_RENTAL_MILES_PER_RENTAL } from '../../data/partners';
+import { SHOPPING_DEFAULT_MILES_PER_DOLLAR } from '../../data/partners';
 
 interface Props {
   spend: PartnerSpend;
   earnings: PartnerEarningsResult;
+  carRentalMilesPerRental: number;
   onChange: (spend: PartnerSpend) => void;
 }
 
@@ -44,8 +45,8 @@ function blockInvalidKeys(e: React.KeyboardEvent<HTMLInputElement>) {
   if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
 }
 
-function DollarInput({ label, value, onChange, placeholder }: {
-  label: string; value: number; onChange: (v: number) => void; placeholder?: string;
+function DollarInput({ label, value, onChange, placeholder, hint }: {
+  label: string; value: number; onChange: (v: number) => void; placeholder?: string; hint?: string;
 }) {
   return (
     <div className="flex-1 min-w-32">
@@ -62,12 +63,13 @@ function DollarInput({ label, value, onChange, placeholder }: {
           className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
+      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
     </div>
   );
 }
 
-function NumberInput({ label, value, onChange, placeholder, suffix }: {
-  label: string; value: number; onChange: (v: number) => void; placeholder?: string; suffix?: string;
+function NumberInput({ label, value, onChange, placeholder, suffix, hint }: {
+  label: string; value: number; onChange: (v: number) => void; placeholder?: string; suffix?: string; hint?: string;
 }) {
   return (
     <div className="flex-1 min-w-32">
@@ -86,11 +88,12 @@ function NumberInput({ label, value, onChange, placeholder, suffix }: {
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">{suffix}</span>
         )}
       </div>
+      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
     </div>
   );
 }
 
-export default function PartnerEarnings({ spend, earnings, onChange }: Props) {
+export default function PartnerEarnings({ spend, earnings, carRentalMilesPerRental, onChange }: Props) {
   function update(patch: Partial<PartnerSpend>) {
     onChange({ ...spend, ...patch });
   }
@@ -138,7 +141,7 @@ export default function PartnerEarnings({ spend, earnings, onChange }: Props) {
         {/* Car Rentals */}
         <CategoryRow
           label="Car Rentals"
-          description={`Avis / Budget — ${CAR_RENTAL_MILES_PER_RENTAL.toLocaleString()} miles per rental · 1 SP/$1`}
+          description={`Avis / Budget — ${carRentalMilesPerRental.toLocaleString()} miles per rental · 1 SP/$1`}
           icon="🚗"
           miles={earnings.carRentals.miles}
           statusPoints={earnings.carRentals.statusPoints}
@@ -148,11 +151,13 @@ export default function PartnerEarnings({ spend, earnings, onChange }: Props) {
             value={spend.carRentals}
             onChange={(v) => update({ carRentals: v })}
             suffix="rentals"
+            hint={`Earns ${carRentalMilesPerRental.toLocaleString()} miles per rental`}
           />
           <DollarInput
             label="Total rental spend"
             value={spend.carRentalDollars}
             onChange={(v) => update({ carRentalDollars: v })}
+            hint="Earns 1 status pt per $1"
           />
         </CategoryRow>
 

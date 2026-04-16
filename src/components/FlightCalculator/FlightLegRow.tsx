@@ -260,6 +260,7 @@ export default function FlightLegRow({ leg, earnings, index, globalElite, earnin
               onChange={(e) => onChange({ ...leg, pointsRedeemed: parseFloat(e.target.value) || 0 })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
+            <p className="text-xs text-gray-400 mt-1">Earns 1 status pt per 20 pts redeemed. No redeemable miles on award tickets.</p>
           </div>
         )}
 

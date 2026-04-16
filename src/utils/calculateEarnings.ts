@@ -26,7 +26,8 @@ import { haversineDistance } from './haversine';
 import {
   HOTEL_MILES_PER_DOLLAR,
   CRUISE_MILES_PER_DOLLAR,
-  CAR_RENTAL_MILES_PER_RENTAL,
+  CAR_RENTAL_MILES_PER_TIER,
+  CAR_RENTAL_MILES_CARD_HOLDER,
   LYFT_MILES_PER_DOLLAR,
   PARTNER_STATUS_POINTS_PER_DOLLAR,
   SHOPPING_STATUS_POINTS_RATIO,
@@ -41,7 +42,7 @@ export function calculateCardEarnings(card: CreditCard, spend: CardSpend): CardE
 
   const totalSpend = spend.alaskaHawaiianFlights + spend.other;
   const anniversaryBonus = spend.includeAnniversaryBonus ? (card.anniversaryStatusPoints ?? 0) : 0;
-  const statusPoints = Math.floor(totalSpend * card.statusPointsPerDollar) + anniversaryBonus;
+  const statusPoints = Math.round(totalSpend * card.statusPointsPerDollar) + anniversaryBonus;
 
   return { cardId: card.id, miles, statusPoints, totalSpend };
 }
@@ -134,15 +135,22 @@ function dollarCategory(miles: number, dollars: number): { miles: number; status
   };
 }
 
-export function calculatePartnerEarnings(spend: PartnerSpend): PartnerEarningsResult {
+export function calculatePartnerEarnings(
+  spend: PartnerSpend,
+  elite: EliteTier = 'none',
+  hasAtmosCard: boolean = false,
+): PartnerEarningsResult {
   const shoppingMiles = spend.shoppingDollars * spend.shoppingMilesPerDollar;
   const shopping = {
     miles: Math.round(shoppingMiles),
     statusPoints: Math.floor(shoppingMiles * SHOPPING_STATUS_POINTS_RATIO), // 1 SP per 3 miles
   };
 
+  const milesPerRental = elite === 'none'
+    ? (hasAtmosCard ? CAR_RENTAL_MILES_CARD_HOLDER : CAR_RENTAL_MILES_PER_TIER.none)
+    : CAR_RENTAL_MILES_PER_TIER[elite];
   const hotels     = dollarCategory(spend.hotelDollars * HOTEL_MILES_PER_DOLLAR, spend.hotelDollars);
-  const carRentals = dollarCategory(spend.carRentals * CAR_RENTAL_MILES_PER_RENTAL, spend.carRentalDollars);
+  const carRentals = dollarCategory(spend.carRentals * milesPerRental, spend.carRentalDollars);
   const cruises    = dollarCategory(spend.cruiseDollars * CRUISE_MILES_PER_DOLLAR, spend.cruiseDollars);
   const lyft       = dollarCategory(spend.lyftDollars * LYFT_MILES_PER_DOLLAR, spend.lyftDollars);
   // SAF and GCI earn status points only — no redeemable miles

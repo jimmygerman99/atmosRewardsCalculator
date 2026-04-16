@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import type { FlightLeg, EliteTier, FlightLegEarnings, EarningMethod2026 } from "../../types";
 import { ELITE_BONUS, EARNING_2026_SEGMENT_RATE } from "../../data/flights";
 import { calculateFlightEarnings } from "../../utils/calculateEarnings";
@@ -54,7 +54,7 @@ export default function FlightCalculator({ legs, elite, earningMethod, highlight
         return { legId: '__ak_segment__', baseMiles: totalBase, miles, statusPoints };
     }, [earningMethod, cashSegmentCount, pointsSegmentCount, elite]);
 
-    useMemo(() => {
+    useEffect(() => {
         const all: FlightLegEarnings[] = akSegmentEarnings ? [akSegmentEarnings, ...legEarnings] : legEarnings;
         onEarnings(all);
     }, [akSegmentEarnings, legEarnings]);

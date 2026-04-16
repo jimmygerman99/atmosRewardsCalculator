@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useRef } from 'react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import type { CardSpend, FlightLeg, FlightLegEarnings, EliteTier, EarningMethod2026, PartnerSpend } from '../../types';
 import { CARD_MAP } from '../../data/cards';
-import { SHOPPING_DEFAULT_MILES_PER_DOLLAR } from '../../data/partners';
+import { SHOPPING_DEFAULT_MILES_PER_DOLLAR, CAR_RENTAL_MILES_PER_TIER, CAR_RENTAL_MILES_CARD_HOLDER } from '../../data/partners';
 import { calculateCardEarnings, calculatePartnerEarnings, sumTotals } from '../../utils/calculateEarnings';
 import EliteStatusSelector from '../shared/EliteStatusSelector';
 import EarningMethodSelector from '../shared/EarningMethodSelector';
@@ -89,7 +89,14 @@ export default function AtmosCalculator() {
     [selectedCardIds, spendMap]
   );
 
-  const partnerEarnings = useMemo(() => calculatePartnerEarnings(partnerSpend), [partnerSpend]);
+  const hasAtmosCard = selectedCardIds.length > 0;
+  const partnerEarnings = useMemo(
+    () => calculatePartnerEarnings(partnerSpend, elite, hasAtmosCard),
+    [partnerSpend, elite, hasAtmosCard],
+  );
+  const carRentalMilesPerRental = elite !== 'none'
+    ? CAR_RENTAL_MILES_PER_TIER[elite]
+    : hasAtmosCard ? CAR_RENTAL_MILES_CARD_HOLDER : CAR_RENTAL_MILES_PER_TIER.none;
 
   const totals = useMemo(
     () => sumTotals(cardEarnings, flightEarnings, partnerEarnings),
@@ -167,6 +174,7 @@ export default function AtmosCalculator() {
         <PartnerEarnings
           spend={partnerSpend}
           earnings={partnerEarnings}
+          carRentalMilesPerRental={carRentalMilesPerRental}
           onChange={setPartnerSpend}
         />
       </CollapsibleSection>

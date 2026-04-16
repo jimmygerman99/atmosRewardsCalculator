@@ -87,7 +87,7 @@ export interface PartnerSpend {
   shoppingDollars: number;
   shoppingMilesPerDollar: number; // user-adjustable, varies by retailer
   hotelDollars: number;
-  carRentals: number;             // number of rentals (1,250 miles each)
+  carRentals: number;             // number of rentals (miles vary by tier: 500 / 750 card / 1,000 silver+gold / 1,250 plat+titanium)
   carRentalDollars: number;       // dollar spend for status points (1 SP/$1)
   cruiseDollars: number;
   lyftDollars: number;            // 2 miles/$1, 1 SP/$1
