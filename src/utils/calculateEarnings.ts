@@ -40,7 +40,15 @@ export function calculateCardEarnings(card: CreditCard, spend: CardSpend): CardE
     spend.alaskaHawaiianFlights * card.earningRates.alaskaHawaiianFlights +
     spend.other * card.earningRates.other;
 
-  const totalSpend = spend.alaskaHawaiianFlights + spend.other;
+  let bonusMiles = 0;
+  let bonusSpendTotal = 0;
+  for (const cat of card.bonusCategories) {
+    const amt = (spend.bonusSpend ?? {})[cat.field] ?? 0;
+    bonusMiles += amt * cat.multiplier;
+    bonusSpendTotal += amt;
+  }
+  const miles = baseMiles + bonusMiles;
+  const totalSpend = spend.alaskaHawaiianFlights + spend.other + bonusSpendTotal;
   const anniversaryBonus = spend.includeAnniversaryBonus ? (card.anniversaryStatusPoints ?? 0) : 0;
   const statusPoints = Math.round(totalSpend * card.statusPointsPerDollar) + anniversaryBonus;
 

@@ -14,6 +14,13 @@ function MultiplierBadge({ value }: { value: string }) {
   );
 }
 
+// Collect all unique bonus categories across all cards for the comparison table rows
+const ALL_BONUS_ROWS = Array.from(
+  new Map(
+    CARDS.flatMap((c) => c.bonusCategories.map((cat) => [cat.field, cat]))
+  ).values()
+);
+
 export default function CardComparisonChart() {
   const [open, setOpen] = useState(false);
 
@@ -52,6 +59,21 @@ export default function CardComparisonChart() {
                 ))}
               </tr>
 
+
+              {/* Bonus categories */}
+              {ALL_BONUS_ROWS.map((row) => (
+                <tr key={row.field} className="border-t border-gray-100 bg-white">
+                  <td className="px-4 py-3 text-gray-600 text-xs">{row.label}</td>
+                  {CARDS.map((card) => {
+                    const cat = card.bonusCategories.find((c) => c.field === row.field);
+                    return (
+                      <td key={card.id} className="px-4 py-3 text-center">
+                        <MultiplierBadge value={cat ? `${cat.multiplier}x` : '—'} />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
 
               {/* All other — 1x for all */}
               <tr className="border-t border-gray-100 bg-white">

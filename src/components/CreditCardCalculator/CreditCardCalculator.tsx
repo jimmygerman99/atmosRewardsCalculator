@@ -16,7 +16,7 @@ import StatusProgressBar from "../StatusProgressBar/StatusProgressBar";
 import SupportFooter from "../SupportFooter/SupportFooter";
 
 function defaultSpend(cardId: string): CardSpend {
-    return { cardId, alaskaHawaiianFlights: 0, other: 0 };
+    return { cardId, alaskaHawaiianFlights: 0, other: 0, includeAnniversaryBonus: false, bonusSpend: {} };
 }
 
 function defaultLeg(): FlightLeg {
