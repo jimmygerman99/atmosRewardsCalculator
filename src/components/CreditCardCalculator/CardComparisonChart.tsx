@@ -1,13 +1,6 @@
 import { useState } from 'react';
 import { CARDS } from '../../data/cards';
 
-// All unique bonus category rows across all cards
-const ALL_BONUS_ROWS = Array.from(
-  new Map(
-    CARDS.flatMap((c) => c.bonusCategories.map((cat) => [cat.field, cat]))
-  ).values()
-);
-
 function MultiplierBadge({ value }: { value: string }) {
   const color =
     value === '3x' ? 'bg-blue-950 text-white' :
@@ -59,20 +52,6 @@ export default function CardComparisonChart() {
                 ))}
               </tr>
 
-              {/* Per-card bonus category rows */}
-              {ALL_BONUS_ROWS.map((row) => (
-                <tr key={row.field} className="border-t border-gray-100 bg-gray-50/50">
-                  <td className="px-4 py-3 text-gray-600 text-xs">{row.label}</td>
-                  {CARDS.map((card) => {
-                    const cat = card.bonusCategories.find((c) => c.field === row.field);
-                    return (
-                      <td key={card.id} className="px-4 py-3 text-center">
-                        {cat ? <MultiplierBadge value={`${cat.multiplier}x`} /> : <span className="text-gray-300 text-xs">—</span>}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
 
               {/* All other — 1x for all */}
               <tr className="border-t border-gray-100 bg-white">
@@ -99,8 +78,8 @@ export default function CardComparisonChart() {
                 <td className="px-4 py-3 text-gray-600 text-xs">Anniversary bonus</td>
                 {CARDS.map((card) => (
                   <td key={card.id} className="px-4 py-3 text-center text-xs">
-                    {card.anniversaryBonusPoints > 0
-                      ? <span className="text-emerald-600 font-semibold">{card.anniversaryBonusPoints.toLocaleString()} SP</span>
+                    {card.anniversaryStatusPoints
+                      ? <span className="text-emerald-600 font-semibold">{card.anniversaryStatusPoints.toLocaleString()} SP</span>
                       : <span className="text-gray-300">—</span>}
                   </td>
                 ))}
