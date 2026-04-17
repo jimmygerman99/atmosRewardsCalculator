@@ -36,7 +36,7 @@ import {
 // ── Credit Card ───────────────────────────────────────────────────────────────
 
 export function calculateCardEarnings(card: CreditCard, spend: CardSpend): CardEarnings {
-  const miles =
+  const baseMiles =
     spend.alaskaHawaiianFlights * card.earningRates.alaskaHawaiianFlights +
     spend.other * card.earningRates.other;
 

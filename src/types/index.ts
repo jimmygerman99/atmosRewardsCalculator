@@ -9,15 +9,17 @@ export interface CreditCard {
     alaskaHawaiianFlights: number; // miles per $1
     other: number;                  // miles per $1
   };
-  statusPointsPerDollar: number; // Summit = 0.5, others = 0.333...
-  anniversaryStatusPoints?: number; // e.g. Summit = 10,000
+  statusPointsPerDollar: number;   // Summit = 0.5, others = 0.333...
+  anniversaryStatusPoints: number; // one-time annual SP bonus on card anniversary (0 if none)
+  bonusCategories: Array<{ field: string; label: string; multiplier: number }>; // 2x/3x spend tiers
 }
 
 export interface CardSpend {
   cardId: string;
-  alaskaHawaiianFlights: number; // dollars
-  other: number;                  // dollars
-  includeAnniversaryBonus?: boolean;
+  alaskaHawaiianFlights: number;     // dollars
+  other: number;                      // dollars
+  includeAnniversaryBonus: boolean;
+  bonusSpend: Record<string, number>; // keyed by bonusCategory.field
 }
 
 export interface CardEarnings {

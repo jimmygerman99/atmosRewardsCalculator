@@ -7,9 +7,14 @@ interface Props {
 }
 
 export default function CardSpendingInputs({ card, spend, onChange }: Props) {
-  function handleChange(field: keyof Omit<CardSpend, 'cardId'>, value: string) {
+  function handleChange(field: keyof Omit<CardSpend, 'cardId' | 'bonusSpend' | 'includeAnniversaryBonus'>, value: string) {
     const num = parseFloat(value) || 0;
     onChange({ ...spend, [field]: num });
+  }
+
+  function handleBonusSpendChange(field: string, value: string) {
+    const num = parseFloat(value) || 0;
+    onChange({ ...spend, bonusSpend: { ...(spend.bonusSpend ?? {}), [field]: num } });
   }
 
   return (
@@ -21,8 +26,11 @@ export default function CardSpendingInputs({ card, spend, onChange }: Props) {
         </div>
         <div className="text-right text-xs text-gray-500">
           <p>3x Alaska/Hawaiian flights</p>
+          {card.bonusCategories.map(cat => (
+            <p key={cat.field}>{cat.multiplier}x {cat.label.split(',')[0].toLowerCase()}, etc.</p>
+          ))}
           <p>1x everything else</p>
-          <p>1 status pt / ${card.statusPointsPerDollar === 0.5 ? '2' : '3'}</p>
+          <p>1 SP / ${card.statusPointsPerDollar === 0.5 ? '2' : '3'}</p>
         </div>
       </div>
 
@@ -46,6 +54,24 @@ export default function CardSpendingInputs({ card, spend, onChange }: Props) {
           </div>
           <p className="text-xs text-gray-400 mt-1">Earns 3x miles</p>
         </div>
+
+        {card.bonusCategories.map(cat => (
+          <div key={cat.field}>
+            <label className="block text-sm text-gray-600 mb-1">{cat.label}</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+              <input
+                type="number" min="0" step="1"
+                value={(spend.bonusSpend ?? {})[cat.field] || ''}
+                placeholder="0"
+                onWheel={(e) => e.currentTarget.blur()}
+                onChange={(e) => handleBonusSpendChange(cat.field, e.target.value)}
+                className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1">Earns {cat.multiplier}x miles</p>
+          </div>
+        ))}
 
         <div>
           <label className="block text-sm text-gray-600 mb-1">
