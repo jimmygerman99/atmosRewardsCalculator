@@ -58,9 +58,9 @@ export default function SupportFooter() {
             </div>
 
             <p className="mt-6 text-center text-[11px] text-gray-400 leading-relaxed max-w-md mx-auto">
-                This calculator is an independent, unofficial tool and is not affiliated with, endorsed by, or sponsored by Atmos
-                Rewards, Alaska Airlines, or Hawaiian Airlines. All program details are based on publicly available information
-                and may not reflect the most current terms.
+                Results are estimates only — always verify earnings with <a href="https://www.alaskaair.com/content/mileage-plan" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-600">alaskaair.com</a> before making travel decisions.
+                This is an independent, unofficial tool not affiliated with, endorsed by, or sponsored by Atmos Rewards, Alaska Airlines, or Hawaiian Airlines.
+                Program details are based on publicly available information and may not reflect the most current terms.
             </p>
         </>
     );
