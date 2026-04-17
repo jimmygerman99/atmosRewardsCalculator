@@ -47,7 +47,8 @@ export function calculateCardEarnings(card: CreditCard, spend: CardSpend): CardE
     bonusMiles += amt * cat.multiplier;
     bonusSpendTotal += amt;
   }
-  const miles = baseMiles + bonusMiles;
+  const rawMiles = baseMiles + bonusMiles;
+  const miles = Math.round(rawMiles * (spend.includeBoaBonus && card.boaAccountBonus ? 1.1 : 1));
   const totalSpend = spend.alaskaHawaiianFlights + spend.other + bonusSpendTotal;
   const anniversaryBonus = spend.includeAnniversaryBonus ? (card.anniversaryStatusPoints ?? 0) : 0;
   const statusPoints = Math.round(totalSpend * card.statusPointsPerDollar) + anniversaryBonus;

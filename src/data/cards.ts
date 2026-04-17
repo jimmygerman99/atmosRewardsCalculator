@@ -12,6 +12,7 @@ export const CARDS: CreditCard[] = [
     bonusCategories: [
       { field: 'gasEvRideshareStreaming', label: 'Gas, EV charging, rideshare, cable & streaming', multiplier: 2 },
     ],
+    boaAccountBonus: true,
   },
   {
     id: 'summit',
@@ -24,6 +25,7 @@ export const CARDS: CreditCard[] = [
     bonusCategories: [
       { field: 'diningForeign', label: 'Dining & foreign transactions', multiplier: 3 },
     ],
+    boaAccountBonus: true,
   },
   {
     id: 'business',
@@ -36,6 +38,7 @@ export const CARDS: CreditCard[] = [
     bonusCategories: [
       { field: 'gasEvShippingTransitRideshare', label: 'Gas, EV charging, shipping & transit', multiplier: 2 },
     ],
+    boaAccountBonus: true,
   },
   {
     id: 'hawaiian-barclays',
@@ -48,6 +51,7 @@ export const CARDS: CreditCard[] = [
     bonusCategories: [
       { field: 'gasDiningGrocery', label: 'Gas, dining & grocery', multiplier: 2 },
     ],
+    boaAccountBonus: false,
   },
 ];
 

@@ -94,6 +94,24 @@ export default function CardSpendingInputs({ card, spend, onChange }: Props) {
         </div>
       </div>
 
+      {card.boaAccountBonus && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={spend.includeBoaBonus ?? false}
+              onChange={(e) => onChange({ ...spend, includeBoaBonus: e.target.checked })}
+              className="w-4 h-4 rounded accent-blue-900 cursor-pointer"
+            />
+            <div>
+              <span className="text-sm text-gray-700 font-medium">I have an eligible Bank of America account</span>
+              <span className="ml-2 text-xs text-blue-600 font-semibold">+10% on all purchase miles</span>
+              <p className="text-xs text-gray-400">Applies to miles earned from card purchases only</p>
+            </div>
+          </label>
+        </div>
+      )}
+
       {card.anniversaryStatusPoints && (
         <div className="mt-4 pt-4 border-t border-gray-100">
           <label className="flex items-center gap-3 cursor-pointer select-none">

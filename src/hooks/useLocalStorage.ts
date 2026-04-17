@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 // Bump this when the shape of persisted state changes to avoid loading stale data.
-const STORAGE_VERSION = 4;
+const STORAGE_VERSION = 5;
 const VERSION_KEY = 'atmos_storage_version';
 
 // On first load, if the stored version doesn't match, wipe all atmos_ keys.

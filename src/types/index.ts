@@ -12,6 +12,7 @@ export interface CreditCard {
   statusPointsPerDollar: number;   // Summit = 0.5, others = 0.333...
   anniversaryStatusPoints: number; // one-time annual SP bonus on card anniversary (0 if none)
   bonusCategories: Array<{ field: string; label: string; multiplier: number }>; // 2x/3x spend tiers
+  boaAccountBonus: boolean; // eligible for 10% BoA account bonus
 }
 
 export interface CardSpend {
@@ -19,6 +20,7 @@ export interface CardSpend {
   alaskaHawaiianFlights: number;     // dollars
   other: number;                      // dollars
   includeAnniversaryBonus: boolean;
+  includeBoaBonus: boolean;
   bonusSpend: Record<string, number>; // keyed by bonusCategory.field
 }
 

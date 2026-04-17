@@ -95,6 +95,18 @@ export default function CardComparisonChart() {
                 ))}
               </tr>
 
+              {/* BoA account bonus */}
+              <tr className="border-t border-gray-100 bg-blue-50/30">
+                <td className="px-4 py-3 text-gray-600 text-xs">BoA account bonus</td>
+                {CARDS.map((card) => (
+                  <td key={card.id} className="px-4 py-3 text-center text-xs font-semibold">
+                    {card.boaAccountBonus
+                      ? <span className="text-blue-700">+10%</span>
+                      : <span className="text-gray-300">—</span>}
+                  </td>
+                ))}
+              </tr>
+
               {/* Anniversary bonus */}
               <tr className="border-t border-gray-100 bg-white">
                 <td className="px-4 py-3 text-gray-600 text-xs">Anniversary bonus</td>
